@@ -1,6 +1,7 @@
 #! /usr/bin/env python3
 # coding: utf-8
 import os
+import time
 import datetime
 import argparse
 import pylab
@@ -25,11 +26,12 @@ if '-' in args.dates:
     end += datetime.timedelta(days=1)
     delta = end - start
     plot_dates = [start + datetime.timedelta(days=i) for i in range(delta.days)]
-    dates = [date.strftime('%m/%d/%G') for date in plot_dates]
+    dates = [date.strftime('%m/%d/%Y') for date in plot_dates]
 else:
-    date = datetime.datetime.strptime(args.dates, '%Y%m%d')
-    plot_dates = [date]
-    dates = [date.strftime('%m/%d/%G')]
+    start = datetime.datetime.strptime(args.dates, '%Y%m%d')
+    end = start + datetime.timedelta(days=1)
+    plot_dates = [start, end]
+    dates = [date.strftime('%m/%d/%Y') for date in plot_dates]
 
 
 # parse currencies
@@ -49,7 +51,7 @@ if not os.path.exists(directory):
 for idx, date in enumerate(dates):
     
     # get xml
-    xml_filename = plot_dates[idx].strftime('%G-%m-%d.xml')
+    xml_filename = plot_dates[idx].strftime('%Y-%m-%d.xml')
     
     # download if no such file
     if not os.path.exists(directory + '/' + xml_filename):
@@ -58,6 +60,7 @@ for idx, date in enumerate(dates):
         xml = page.read().decode(encoding='UTF-8')
         with open(directory + '/' + xml_filename, 'w') as xml_file:
             xml_file.write(xml)
+        time.sleep(0.2)
     
     # read the file
     with open(directory + '/' + xml_filename) as xml_file:
@@ -70,7 +73,11 @@ for idx, date in enumerate(dates):
     
     # collect the data
     for currency in currencies:
-        currency_idx = charcodes.index(currency)
+        try:
+            currency_idx = charcodes.index(currency)
+        except ValueError:
+            print('problem with xml by url:', URL + date)
+            exit()
         rate = rates[currency_idx]
         plot_currencies[currency].append(rate)
 
