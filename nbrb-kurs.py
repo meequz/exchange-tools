@@ -49,22 +49,30 @@ if not os.path.exists(directory):
 
 # collect data
 for idx, date in enumerate(dates):
-    
     # get xml
     xml_filename = plot_dates[idx].strftime('%Y-%m-%d.xml')
+    full_filename = directory + '/' + xml_filename
     
     # download if no such file
-    if not os.path.exists(directory + '/' + xml_filename):
+    if not os.path.exists(full_filename):
         print('downloading {}'.format(xml_filename))
         page = urllib.request.urlopen(URL + date)
         xml = page.read().decode(encoding='UTF-8')
-        with open(directory + '/' + xml_filename, 'w') as xml_file:
-            xml_file.write(xml)
-        time.sleep(0.2)
+        if 'xml' in xml:
+            with open(full_filename, 'w') as xml_file:
+                xml_file.write(xml)
+        else:
+            print('Too many requests. Wait some time and try again. URL:', URL+date)
+            exit()
+        time.sleep(0.35)
     
     # read the file
-    with open(directory + '/' + xml_filename) as xml_file:
+    with open(full_filename) as xml_file:
         xml = ''.join(xml_file.readlines())
+    if 'html' in xml:
+        print('Please restart the script.')
+        os.remove(full_filename)
+        exit()
     
     # parse xml
     soup = BeautifulSoup(xml)
