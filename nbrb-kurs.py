@@ -21,8 +21,8 @@ args = parser.parse_args()
 # parse dates
 if '-' in args.dates:
     splitted = args.dates.split('-')
-    start = datetime.datetime.strptime(splitted[0], '%Y%m%d').date()
-    end = datetime.datetime.strptime(splitted[1], '%Y%m%d').date()
+    start = datetime.datetime.strptime(splitted[0], '%Y%m%d')
+    end = datetime.datetime.strptime(splitted[1], '%Y%m%d')
     end += datetime.timedelta(days=1)
     delta = end - start
     plot_dates = [start + datetime.timedelta(days=i) for i in range(delta.days)]
@@ -58,12 +58,11 @@ for idx, date in enumerate(dates):
         print('downloading {}'.format(xml_filename))
         page = urllib.request.urlopen(URL + date)
         xml = page.read().decode(encoding='UTF-8')
-        if 'xml' in xml:
-            with open(full_filename, 'w') as xml_file:
-                xml_file.write(xml)
-        else:
+        if 'html' in xml:
             print('Too many requests. Wait some time and try again. URL:', URL+date)
             exit()
+        with open(full_filename, 'w') as xml_file:
+            xml_file.write(xml)
         time.sleep(0.35)
     
     # read the file
@@ -81,10 +80,20 @@ for idx, date in enumerate(dates):
     
     # collect the data
     for currency in currencies:
+        hack_currency = currency
+        
+        # hack for russian ruble
+        if currency == 'RUR' and \
+           plot_dates[idx] >= datetime.datetime.strptime('20030101', '%Y%m%d'):
+            hack_currency = 'RUB'
+        if currency == 'RUB' and \
+           plot_dates[idx] < datetime.datetime.strptime('20030101', '%Y%m%d'):
+            hack_currency = 'RUR'
+        
         try:
-            currency_idx = charcodes.index(currency)
+            currency_idx = charcodes.index(hack_currency)
         except ValueError:
-            print('problem with xml by url:', URL + date)
+            print('problem with currency {} in {}. URL: {}'.format(hack_currency, full_filename, URL+date))
             exit()
         rate = rates[currency_idx]
         plot_currencies[currency].append(rate)
