@@ -59,9 +59,8 @@ for idx, date in enumerate(dates):
         page = urllib.request.urlopen(URL + date)
         xml = page.read().decode(encoding='UTF-8')
         if 'html' in xml:
-            print('Too many requests. Wait for 5 minutes and try again. Now is {}. URL: {}',
-            datetime.datetime.now().strftime('%H:%M:%S'),
-            URL+date)
+            message = 'Too many requests. Wait for 5 minutes and try again. It is {} now. URL: {}'
+            print(message.format(datetime.datetime.now().strftime('%H:%M:%S'), URL+date))
             exit()
         with open(full_filename, 'w') as xml_file:
             xml_file.write(xml)
@@ -70,7 +69,8 @@ for idx, date in enumerate(dates):
     # read the file
     with open(full_filename) as xml_file:
         xml = ''.join(xml_file.readlines())
-    if 'html' in xml:
+    if 'html' in xml or\
+       not 'CharCode' in xml:
         print('Please restart the script.')
         os.remove(full_filename)
         exit()
