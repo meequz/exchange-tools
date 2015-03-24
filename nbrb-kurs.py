@@ -71,7 +71,8 @@ for idx, date in enumerate(dates):
         xml = ''.join(xml_file.readlines())
     if 'html' in xml or\
        not 'CharCode' in xml:
-        print('Please restart the script.')
+        message = 'Wrong file: {}. It has been deleted. Please restart the script to redownload it.'
+        print(message.format(full_filename))
         os.remove(full_filename)
         exit()
     
