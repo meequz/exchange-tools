@@ -59,11 +59,13 @@ for idx, date in enumerate(dates):
         page = urllib.request.urlopen(URL + date)
         xml = page.read().decode(encoding='UTF-8')
         if 'html' in xml:
-            print('Too many requests. Wait some time and try again. URL:', URL+date)
+            print('Too many requests. Wait for 5 minutes and try again. Now is {}. URL: {}',
+            datetime.datetime.now().strftime('%H:%M:%S'),
+            URL+date)
             exit()
         with open(full_filename, 'w') as xml_file:
             xml_file.write(xml)
-        time.sleep(0.35)
+        time.sleep(1)
     
     # read the file
     with open(full_filename) as xml_file:
@@ -80,20 +82,20 @@ for idx, date in enumerate(dates):
     
     # collect the data
     for currency in currencies:
-        hack_currency = currency
+        replace_currency = currency
         
         # hack for russian ruble
         if currency == 'RUR' and \
            plot_dates[idx] >= datetime.datetime.strptime('20030101', '%Y%m%d'):
-            hack_currency = 'RUB'
+            replace_currency = 'RUB'
         if currency == 'RUB' and \
            plot_dates[idx] < datetime.datetime.strptime('20030101', '%Y%m%d'):
-            hack_currency = 'RUR'
+            replace_currency = 'RUR'
         
         try:
-            currency_idx = charcodes.index(hack_currency)
+            currency_idx = charcodes.index(replace_currency)
         except ValueError:
-            print('problem with currency {} in {}. URL: {}'.format(hack_currency, full_filename, URL+date))
+            print('problem with currency {} in {}. URL: {}'.format(replace_currency, full_filename, URL+date))
             exit()
         rate = rates[currency_idx]
         plot_currencies[currency].append(rate)
