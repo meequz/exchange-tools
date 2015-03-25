@@ -140,11 +140,21 @@ for idx, date in enumerate(dates):
            plot_dates[idx] < datetime.datetime.strptime('20030101', '%Y%m%d'):
             replace_currency = 'RUR'
         
+        # hack for polish zloty
+        if currency == 'PLZ' and \
+           plot_dates[idx] >= datetime.datetime.strptime('20030104', '%Y%m%d'):
+            replace_currency = 'PLN'
+        if currency == 'PLN' and \
+           plot_dates[idx] < datetime.datetime.strptime('20030101', '%Y%m%d'):
+            replace_currency = 'PLZ'
+        
         try:
             currency_idx = charcodes.index(replace_currency)
         except ValueError:
-            print('problem with currency {} in {}. URL: {}'.format(replace_currency, full_filename, URL+date))
-            exit()
+            message = 'problem with currency {} in {}. Empty point added. URL: {}'
+            print(message.format(replace_currency, full_filename, URL+date))
+            plot_currencies[currency].append(None)
+            continue
         rate = rates[currency_idx]
         plot_currencies[currency].append(rate)
 
