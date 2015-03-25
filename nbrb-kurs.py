@@ -1,12 +1,19 @@
 #! /usr/bin/env python3
 # coding: utf-8
 import os
+import sys
 import time
 import datetime
 import argparse
 import pylab
 import urllib.request
 from bs4 import BeautifulSoup
+
+
+def print_inplace(string):
+    string = str(string) + '\r'
+    sys.stdout.write(string)
+    sys.stdout.flush()
 
 
 URL = 'http://www.nbrb.by/Services/XmlExRates.aspx?ondate='
@@ -53,9 +60,12 @@ for idx, date in enumerate(dates):
     xml_filename = plot_dates[idx].strftime('%Y-%m-%d.xml')
     full_filename = directory + '/' + xml_filename
     
+    # report
+    print_inplace('processing ' + full_filename)
+    
     # download if no such file
     if not os.path.exists(full_filename):
-        print('downloading {}'.format(xml_filename))
+        print_inplace('downloading {}    '.format(xml_filename))
         page = urllib.request.urlopen(URL + date)
         xml = page.read().decode(encoding='UTF-8')
         if 'html' in xml:
@@ -69,6 +79,7 @@ for idx, date in enumerate(dates):
     # read the file
     with open(full_filename) as xml_file:
         xml = ''.join(xml_file.readlines())
+    # if it is not an xml or there is no data in it, delete the wrong file and restart
     if 'html' in xml or\
        not 'CharCode' in xml:
         message = 'Wrong file: {}. It has been deleted. Please restart the script to redownload it.'
