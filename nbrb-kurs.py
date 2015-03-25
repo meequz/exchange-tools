@@ -64,6 +64,10 @@ else:
         end += datetime.timedelta(days=1)
         delta = end - start
         plot_dates = [start + datetime.timedelta(days=i) for i in range(delta.days)]
+    elif args.dates == 'today':
+        start = datetime.datetime.now()
+        end = start + datetime.timedelta(days=1)
+        plot_dates = [start, end]
     else:
         start = datetime.datetime.strptime(args.dates, '%Y%m%d')
         end = start + datetime.timedelta(days=1)
