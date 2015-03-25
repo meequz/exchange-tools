@@ -20,25 +20,35 @@ URL = 'http://www.nbrb.by/Services/XmlExRates.aspx?ondate='
 
 # arguments
 parser = argparse.ArgumentParser()
-parser.add_argument('-d', dest='dates', help='A date or the date range.')
-parser.add_argument('-c', dest='currencies', help='Currency or currencies.')
+parser.add_argument('-d', dest='dates',
+                    help='A date or the date range. If not specified, last month will be showed.')
+parser.add_argument('-c', dest='currencies',
+                    help='ISO code of currency or currencies.')
 args = parser.parse_args()
 
 
 # parse dates
-if '-' in args.dates:
-    splitted = args.dates.split('-')
-    start = datetime.datetime.strptime(splitted[0], '%Y%m%d')
-    end = datetime.datetime.strptime(splitted[1], '%Y%m%d')
-    end += datetime.timedelta(days=1)
-    delta = end - start
-    plot_dates = [start + datetime.timedelta(days=i) for i in range(delta.days)]
+if args.dates is None:
+    start = datetime.datetime.now() - datetime.timedelta(days=30)
+    plot_dates = [start + datetime.timedelta(days=i) for i in range(30)]
     dates = [date.strftime('%m/%d/%Y') for date in plot_dates]
 else:
-    start = datetime.datetime.strptime(args.dates, '%Y%m%d')
-    end = start + datetime.timedelta(days=1)
-    plot_dates = [start, end]
-    dates = [date.strftime('%m/%d/%Y') for date in plot_dates]
+    if '-' in args.dates:
+        splitted = args.dates.split('-')
+        start = datetime.datetime.strptime(splitted[0], '%Y%m%d')
+        if splitted[1] != 'today':
+            end = datetime.datetime.strptime(splitted[1], '%Y%m%d')
+        else:
+            end = datetime.datetime.now()
+        end += datetime.timedelta(days=1)
+        delta = end - start
+        plot_dates = [start + datetime.timedelta(days=i) for i in range(delta.days)]
+        dates = [date.strftime('%m/%d/%Y') for date in plot_dates]
+    else:
+        start = datetime.datetime.strptime(args.dates, '%Y%m%d')
+        end = start + datetime.timedelta(days=1)
+        plot_dates = [start, end]
+        dates = [date.strftime('%m/%d/%Y') for date in plot_dates]
 
 
 # parse currencies
