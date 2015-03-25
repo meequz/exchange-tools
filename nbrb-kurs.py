@@ -26,7 +26,27 @@ parser.add_argument('-d', dest='dates',
 parser.add_argument('-c', dest='currencies',
                     help='ISO 4217 code of currency or currencies.' +
                     ' If not specified, EUR and USD will be showed.')
+parser.add_argument('-e', action='store_true', help='See usage examples.')
 args = parser.parse_args()
+
+
+# parse e
+if args.e:
+    message = 'How to use:\n'
+    message += 'python nbrb-kurs.py\n' + \
+            '\t- see USD and EUR for two last months\n'
+    message += 'python nbrb-kurs.py -c XDR,USD,EUR\n' + \
+            '\t- see XDR, USD and EUR for two last months\n'
+    message += 'python nbrb-kurs.py -d 20140101 -c USD,XDR,EUR\n' + \
+            '\t- see XDR, USD and EUR from 1 Jan 2014 to 2 Jan 2014\n'
+    message += 'python nbrb-kurs.py -d 20140101-20150325 -c USD,UAH\n' + \
+            '\t- see USD and UAH from 1 Jan 2014 to 25 March 2015\n'
+    message += 'python nbrb-kurs.py -d 20140101-today -c UAH,RUB\n' + \
+            '\t- see UAH and RUB from 1 Jan 2014 to today\n'
+    message += 'python nbrb-kurs.py -d 20140101-today\n' + \
+            '\t- see USD and EUR from 1 Jan 2014 to today\n'
+    print(message)
+    exit()
 
 
 # parse dates
