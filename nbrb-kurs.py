@@ -21,17 +21,18 @@ URL = 'http://www.nbrb.by/Services/XmlExRates.aspx?ondate='
 # arguments
 parser = argparse.ArgumentParser()
 parser.add_argument('-d', dest='dates',
-                    help='A date or the date range. If not specified, last month will be showed.')
+                    help='A date or the date range. If not specified,' +
+                    ' two last months will be showed.')
 parser.add_argument('-c', dest='currencies',
-                    help='ISO code of currency or currencies.')
+                    help='ISO 4217 code of currency or currencies.' +
+                    ' If not specified, EUR and USD will be showed.')
 args = parser.parse_args()
 
 
 # parse dates
 if args.dates is None:
-    start = datetime.datetime.now() - datetime.timedelta(days=30)
-    plot_dates = [start + datetime.timedelta(days=i) for i in range(30)]
-    dates = [date.strftime('%m/%d/%Y') for date in plot_dates]
+    start = datetime.datetime.now() - datetime.timedelta(days=60)
+    plot_dates = [start + datetime.timedelta(days=i) for i in range(60)]
 else:
     if '-' in args.dates:
         splitted = args.dates.split('-')
@@ -43,19 +44,20 @@ else:
         end += datetime.timedelta(days=1)
         delta = end - start
         plot_dates = [start + datetime.timedelta(days=i) for i in range(delta.days)]
-        dates = [date.strftime('%m/%d/%Y') for date in plot_dates]
     else:
         start = datetime.datetime.strptime(args.dates, '%Y%m%d')
         end = start + datetime.timedelta(days=1)
         plot_dates = [start, end]
-        dates = [date.strftime('%m/%d/%Y') for date in plot_dates]
+dates = [date.strftime('%m/%d/%Y') for date in plot_dates]
 
 
 # parse currencies
-currencies = args.currencies.split(',')
-plot_currencies = {}
-for currency in currencies:
-    plot_currencies[currency] = []
+if args.currencies is None:
+    currencies = ['EUR', 'USD']
+else:
+    currencies = args.currencies.split(',')
+    currencies = [currency.strip() for currency in currencies]
+plot_currencies = {currency: [] for currency in currencies}
 
 
 # check if path exists
