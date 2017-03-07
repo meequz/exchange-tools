@@ -96,13 +96,13 @@ for idx, date in enumerate(dates):
     # get xml
     xml_filename = plot_dates[idx].strftime('%Y-%m-%d.xml')
     full_filename = directory + '/' + xml_filename
-    
+
     # report
-    print_inplace('processing ' + full_filename)
-    
+    print('processing ' + full_filename)
+
     # download if no such file
     if not os.path.exists(full_filename):
-        print_inplace('downloading {}    '.format(xml_filename))
+        print('downloading {}    '.format(xml_filename))
         page = urllib.request.urlopen(URL + date)
         xml = page.read().decode(encoding='UTF-8')
         if 'html' in xml:
@@ -123,16 +123,16 @@ for idx, date in enumerate(dates):
         print(message.format(full_filename))
         os.remove(full_filename)
         exit()
-    
+
     # parse xml
     soup = BeautifulSoup(xml)
     charcodes = [item.contents[0] for item in soup.find_all('charcode')]
     rates = [float(item.contents[0]) for item in soup.find_all('rate')]
-    
+
     # collect the data
     for currency in currencies:
         replace_currency = currency
-        
+
         # hack for russian ruble
         if currency == 'RUR' and \
            plot_dates[idx] >= datetime.datetime.strptime('20030101', '%Y%m%d'):
@@ -140,7 +140,7 @@ for idx, date in enumerate(dates):
         if currency == 'RUB' and \
            plot_dates[idx] < datetime.datetime.strptime('20030101', '%Y%m%d'):
             replace_currency = 'RUR'
-        
+
         # hack for polish zloty
         if currency == 'PLZ' and \
            plot_dates[idx] >= datetime.datetime.strptime('20030104', '%Y%m%d'):
@@ -148,7 +148,7 @@ for idx, date in enumerate(dates):
         if currency == 'PLN' and \
            plot_dates[idx] < datetime.datetime.strptime('20030101', '%Y%m%d'):
             replace_currency = 'PLZ'
-        
+
         try:
             currency_idx = charcodes.index(replace_currency)
         except ValueError:
