@@ -154,6 +154,11 @@ for idx, date in enumerate(dates):
            plot_dates[idx] < datetime.datetime.strptime('20030101', '%Y%m%d'):
             replace_currency = 'PLZ'
 
+        rate_factor = 1.0
+        # hack for belarussian rubble denomination 2016
+        if plot_date < datetime.datetime.strptime('20160701', '%Y%m%d'):
+            rate_factor = 0.0001
+
         try:
             currency_idx = charcodes.index(replace_currency)
         except ValueError:
@@ -161,7 +166,7 @@ for idx, date in enumerate(dates):
             print(message.format(replace_currency, full_filename, URL_host+URL_path+date))
             plot_currencies[currency].append(None)
             continue
-        rate = rates[currency_idx]
+        rate = rates[currency_idx] * rate_factor
         plot_currencies[currency].append(rate)
 
 
