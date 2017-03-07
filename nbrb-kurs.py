@@ -2,6 +2,7 @@
 # coding: utf-8
 import os
 import sys
+import io
 import time
 import datetime
 import argparse
@@ -108,12 +109,12 @@ for idx, date in enumerate(dates):
             message = 'Too many requests. Wait for 5 minutes and try again. It is {} now. URL: {}'
             print(message.format(datetime.datetime.now().strftime('%H:%M:%S'), URL+date))
             exit()
-        with open(full_filename, 'w') as xml_file:
+        with io.open(full_filename, 'w', newline='', encoding='utf-8') as xml_file:
             xml_file.write(xml)
         time.sleep(1)
     
     # read the file
-    with open(full_filename) as xml_file:
+    with io.open(full_filename, 'r', newline='', encoding='utf-8') as xml_file:
         xml = ''.join(xml_file.readlines())
     # if it is not an xml or there is no data in it, delete the wrong file and restart
     if 'html' in xml or\
