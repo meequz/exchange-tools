@@ -7,7 +7,7 @@ import time
 import datetime
 import argparse
 import pylab
-import urllib.request
+import http.client
 from bs4 import BeautifulSoup
 
 
@@ -17,7 +17,8 @@ def print_inplace(string):
     sys.stdout.flush()
 
 
-URL = 'http://www.nbrb.by/Services/XmlExRates.aspx?ondate='
+URL_host = 'www.nbrb.by'
+URL_path = '/Services/XmlExRates.aspx?ondate='
 
 # arguments
 parser = argparse.ArgumentParser()
@@ -90,6 +91,8 @@ directory = 'xmls'
 if not os.path.exists(directory):
     os.makedirs(directory)
 
+# create persistent HTTP connection object
+conn = http.client.HTTPConnection(URL_host, 80)
 
 # collect data
 for idx, date in enumerate(dates):
@@ -103,16 +106,18 @@ for idx, date in enumerate(dates):
     # download if no such file
     if not os.path.exists(full_filename):
         print('downloading {}    '.format(xml_filename))
-        page = urllib.request.urlopen(URL + date)
+        conn.request('GET', URL_path + date, None, {})
+        page = conn.getresponse()
+        print('download status: {}; reason: {}'.format(page.status, page.reason))
+
         xml = page.read().decode(encoding='UTF-8')
         if 'html' in xml:
             message = 'Too many requests. Wait for 5 minutes and try again. It is {} now. URL: {}'
-            print(message.format(datetime.datetime.now().strftime('%H:%M:%S'), URL+date))
+            print(message.format(datetime.datetime.now().strftime('%H:%M:%S'), URL_host+URL_path+date))
             exit()
         with io.open(full_filename, 'w', newline='', encoding='utf-8') as xml_file:
             xml_file.write(xml)
-        time.sleep(1)
-    
+
     # read the file
     with io.open(full_filename, 'r', newline='', encoding='utf-8') as xml_file:
         xml = ''.join(xml_file.readlines())
@@ -153,7 +158,7 @@ for idx, date in enumerate(dates):
             currency_idx = charcodes.index(replace_currency)
         except ValueError:
             message = 'problem with currency {} in {}. Empty point added. URL: {}'
-            print(message.format(replace_currency, full_filename, URL+date))
+            print(message.format(replace_currency, full_filename, URL_host+URL_path+date))
             plot_currencies[currency].append(None)
             continue
         rate = rates[currency_idx]
